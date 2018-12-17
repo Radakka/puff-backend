@@ -1,0 +1,7 @@
+com:
+  puff:
+    couchbase:
+      host: localhost
+      bucket: test
+      user: test
+      password: pruebas123
