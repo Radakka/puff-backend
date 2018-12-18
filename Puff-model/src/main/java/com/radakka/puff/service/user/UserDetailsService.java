@@ -25,5 +25,4 @@ public class UserDetailsService implements ReactiveUserDetailsService {
 		})).map(User::toUserDetails);
 	}
 	
-	
 }
