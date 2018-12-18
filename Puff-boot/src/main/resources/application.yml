@@ -5,3 +5,12 @@ com:
       bucket: test
       user: test
       password: test1234
+    auth:
+      password:
+        encoder:
+          secret: 123456 #Change it
+          iteration: 33
+          keylength: 256
+      jwt:
+        secret: 987654 #Change it
+        expiration: 28800
