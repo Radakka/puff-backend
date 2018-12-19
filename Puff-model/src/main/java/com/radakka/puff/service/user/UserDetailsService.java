@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.radakka.puff.entity.user.User;
 import com.radakka.puff.repository.user.UserRepository;
-import com.radakka.puff.utils.UserIdUtils;
+import com.radakka.puff.utils.EntityIdUtils;
 
 import reactor.core.publisher.Mono;
 
@@ -20,7 +20,7 @@ public class UserDetailsService implements ReactiveUserDetailsService {
 
 	@Override
 	public Mono<UserDetails> findByUsername(String username) {
-		return this.userRepository.findById(UserIdUtils.getUserId(username)).switchIfEmpty(Mono.defer(() -> {
+		return this.userRepository.findById(EntityIdUtils.getUserId(username)).switchIfEmpty(Mono.defer(() -> {
 			return Mono.error(new UsernameNotFoundException("User Not Found"));
 		})).map(User::toUserDetails);
 	}

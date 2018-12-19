@@ -12,7 +12,7 @@ import com.radakka.puff.entity.user.User;
 import com.radakka.puff.exception.UsernameAlreadyExistsException;
 import com.radakka.puff.repository.user.UserRepository;
 import com.radakka.puff.security.PBKDF2Encoder;
-import com.radakka.puff.utils.UserIdUtils;
+import com.radakka.puff.utils.EntityIdUtils;
 
 import reactor.core.publisher.Mono;
 
@@ -27,7 +27,7 @@ public class UserService {
 	
 	public Mono<User> registerUser(RegisterRequest registerRequest) {
 		User user = new User();
-		user.setId(UserIdUtils.getUserId(registerRequest.getUsername()));
+		user.setId(EntityIdUtils.getUserId(registerRequest.getUsername()));
 		user.setUsername(registerRequest.getUsername());
 		user.setRoles(Arrays.asList(Role.ROLE_USER));
 		user.setPassword(this.passwordEncoder.encode(registerRequest.getPassword()));

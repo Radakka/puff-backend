@@ -27,6 +27,9 @@ public class User extends AbstractEntity {
 	@Field
 	@NotNull
 	private String password;
+	
+	@Field
+	private List<String> games;
 
 	@Field
 	private List<Role> roles;
