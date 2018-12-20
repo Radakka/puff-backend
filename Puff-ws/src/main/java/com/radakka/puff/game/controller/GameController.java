@@ -1,5 +1,7 @@
 package com.radakka.puff.game.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,7 @@ public class GameController {
 	
 	@PostMapping("/game/new")
 	@PreAuthorize("hasRole('USER')")
-	public Mono<GameDTO> startNewGame(@AuthenticationPrincipal String username, @RequestBody NewGameRequestDTO request) {
+	public Mono<GameDTO> startNewGame(@AuthenticationPrincipal String username, @RequestBody @Valid NewGameRequestDTO request) {
 		//TODO Validate input (users, number of decks)
 		return this.gameService.createNewGame(request.getUserNames(), request.getNumberOfDecks()).map((game) -> {
 			return this.gameMapper.gameToDTO(game, username);
