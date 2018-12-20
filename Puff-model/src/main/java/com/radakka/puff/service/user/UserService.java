@@ -7,7 +7,7 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import com.radakka.puff.authentication.user.Role;
-import com.radakka.puff.dto.auth.RegisterRequest;
+import com.radakka.puff.dto.auth.RegisterRequestDTO;
 import com.radakka.puff.entity.user.User;
 import com.radakka.puff.exception.UsernameAlreadyExistsException;
 import com.radakka.puff.repository.user.UserRepository;
@@ -25,7 +25,7 @@ public class UserService {
 	@Autowired
 	private PBKDF2Encoder passwordEncoder;
 	
-	public Mono<User> registerUser(RegisterRequest registerRequest) {
+	public Mono<User> registerUser(RegisterRequestDTO registerRequest) {
 		User user = new User();
 		user.setId(EntityIdUtils.getUserId(registerRequest.getUsername()));
 		user.setUsername(registerRequest.getUsername());

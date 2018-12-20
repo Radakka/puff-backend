@@ -8,12 +8,12 @@ public class EntityIdUtils {
 		return "PUFF::USER::"+username;
 	}
 	
-	public static String getGameId(UUID uniqueId) {
-		return "PUFF::GAME::"+uniqueId.toString();
+	public static String getGameId(String uniqueId) {
+		return "PUFF::GAME::"+uniqueId;
 	}
 	
 	public static String generateNewGameId() {
-		return getGameId(UUID.randomUUID());
+		return getGameId(UUID.randomUUID().toString());
 	}
 
 }

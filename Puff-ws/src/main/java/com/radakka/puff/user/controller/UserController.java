@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.radakka.puff.dto.auth.AuthRequest;
-import com.radakka.puff.dto.auth.AuthResponse;
-import com.radakka.puff.dto.auth.RegisterRequest;
+import com.radakka.puff.dto.auth.AuthRequestDTO;
+import com.radakka.puff.dto.auth.AuthResponseDTO;
+import com.radakka.puff.dto.auth.RegisterRequestDTO;
 import com.radakka.puff.exception.UsernameAlreadyExistsException;
 import com.radakka.puff.security.JWTUtils;
 import com.radakka.puff.security.PBKDF2Encoder;
@@ -35,10 +35,10 @@ public class UserController {
 	private UserService userService;
 	
 	@PostMapping("/login")
-	public Mono<ResponseEntity<?>> login(@RequestBody AuthRequest authRequest) {
+	public Mono<ResponseEntity<?>> login(@RequestBody AuthRequestDTO authRequest) {
 		return this.userDetailsService.findByUsername(authRequest.getUsername()).map((userDetails) -> {
 			if (passwordEncoder.encode(authRequest.getPassword()).equals(userDetails.getPassword())) {
-				return ResponseEntity.ok(new AuthResponse(jwtUtil.generateToken(userDetails)));
+				return ResponseEntity.ok(new AuthResponseDTO(jwtUtil.generateToken(userDetails)));
 			} else {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
@@ -47,7 +47,7 @@ public class UserController {
 	
 	@PostMapping("/register")
 	@PreAuthorize("hasRole('ADMIN')")
-	public Mono<ResponseEntity<Object>> register(@RequestBody RegisterRequest registerRequest) {
+	public Mono<ResponseEntity<Object>> register(@RequestBody RegisterRequestDTO registerRequest) {
 		return this.userService.registerUser(registerRequest).map((savedUser) -> {
 			return ResponseEntity.ok().build();
 		}).onErrorResume((exception) -> {

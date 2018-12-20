@@ -3,7 +3,7 @@ package com.radakka.puff.dto.auth;
 import lombok.Data;
 
 @Data
-public class RegisterRequest {
+public class RegisterRequestDTO {
 
 	private String username;
 	private String password;

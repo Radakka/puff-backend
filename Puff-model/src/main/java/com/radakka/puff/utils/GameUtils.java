@@ -15,14 +15,18 @@ public class GameUtils {
 		Game game = new Game();
 		game.setId(EntityIdUtils.generateNewGameId());
 		game.setPlayedStack(new ArrayList<>());
+		game.setCurrentTurn(1);
 		
 		List<Card> deck = generateShuffledDeck(numberOfDecks);
 		List<Player> players = new ArrayList<>();
 		
-		//TODO randomize turn order and starting player
-		for(String user : userNames) {
+		Random random = new Random();
+		int turn = 1;
+		while(userNames.size() > 0) {
 			Player player = new Player();
-			player.setUsername(user);
+			player.setUsername(userNames.remove(random.nextInt(userNames.size())));
+			player.setTurn(turn);
+			turn++;
 			
 			List<Card> faceDown = new ArrayList<>();
 			List<Card> faceUp = new ArrayList<>();

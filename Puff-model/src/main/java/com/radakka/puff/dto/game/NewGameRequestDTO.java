@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class NewGameRequest {
+public class NewGameRequestDTO {
 
 	@NotNull
 	@NotEmpty
