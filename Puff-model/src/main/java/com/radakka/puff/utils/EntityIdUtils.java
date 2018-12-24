@@ -15,5 +15,9 @@ public class EntityIdUtils {
 	public static String generateNewGameId() {
 		return getGameId(UUID.randomUUID().toString());
 	}
+	
+	public static String extractGameId(String fullId) {
+		return fullId.replace("PUFF::GAME::", "");
+	}
 
 }

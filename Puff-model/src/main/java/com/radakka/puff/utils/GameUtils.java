@@ -3,6 +3,7 @@ package com.radakka.puff.utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import com.radakka.puff.entity.game.Card;
 import com.radakka.puff.entity.game.Game;
@@ -12,6 +13,13 @@ import com.radakka.puff.entity.game.Suit;
 public class GameUtils {
 	
 	public static Game initializeGame(List<String> userNames, int numberOfDecks) {
+		
+		//Validate that there is enough decks for the given players
+		int cardsNeeded = userNames.stream().distinct().collect(Collectors.toList()).size() * 9;
+		if(cardsNeeded > numberOfDecks * 40) {
+			throw new RuntimeException("Not enough cards in "+numberOfDecks+ " deck for "+userNames.size()+ " players");
+		}
+		
 		Game game = new Game();
 		game.setId(EntityIdUtils.generateNewGameId());
 		game.setPlayedStack(new ArrayList<>());
