@@ -7,10 +7,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.radakka.puff.entity.game.CardPlayEvent;
 import com.radakka.puff.entity.game.Game;
 import com.radakka.puff.exception.UsersNotFoundException;
 import com.radakka.puff.repository.user.GameRepository;
 import com.radakka.puff.repository.user.UserRepository;
+import com.radakka.puff.rules.GameRules;
 import com.radakka.puff.utils.EntityIdUtils;
 import com.radakka.puff.utils.GameUtils;
 
@@ -54,6 +56,17 @@ public class GameService {
 			if(game.getPlayers().stream().filter((player) -> 
 				player.getUsername().equals(username)).collect(Collectors.toList()).size() > 0) {
 				return Mono.just(game);
+			} else {
+				return Mono.empty();
+			}
+		});
+	}
+	
+	public Mono<Game> playCard(String username, String gameId, CardPlayEvent cardPlayed) {
+		return this.gameRepository.findById(EntityIdUtils.getGameId(gameId)).flatMap((game) -> {
+			if(game.getPlayers().stream().filter((player) -> 
+				player.getUsername().equals(username)).collect(Collectors.toList()).size() > 0) {
+				return Mono.just(GameRules.playCard(username, game, cardPlayed));
 			} else {
 				return Mono.empty();
 			}

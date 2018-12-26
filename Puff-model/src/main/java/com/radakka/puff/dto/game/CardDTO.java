@@ -11,4 +11,6 @@ public class CardDTO {
 	
 	private Suit suit;
 	
+	private Boolean playable;
+	
 }

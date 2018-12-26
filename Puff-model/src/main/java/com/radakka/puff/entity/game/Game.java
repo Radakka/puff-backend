@@ -26,5 +26,8 @@ public class Game extends AbstractEntity {
 	
 	@Field
 	private Integer currentTurn;
+	
+	@Field
+	private List<GameEvent> events;
 
 }

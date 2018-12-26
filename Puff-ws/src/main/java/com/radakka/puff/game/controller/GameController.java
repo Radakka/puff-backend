@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.radakka.puff.dto.game.CardPlayDTO;
 import com.radakka.puff.dto.game.GameDTO;
 import com.radakka.puff.dto.game.NewGameRequestDTO;
 import com.radakka.puff.mapper.GameMapper;
@@ -44,6 +45,13 @@ public class GameController {
 		return this.gameService.retrieveGame(username, gameId).map((game) -> {
 			return ResponseEntity.ok(this.gameMapper.gameToDTO(game, username));
 		}).defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+	}
+	
+	@PostMapping("/game/{gameId}/play")
+	@PreAuthorize("hasRole('USER')")
+	public Mono<ResponseEntity<GameDTO>> playCard(@AuthenticationPrincipal String username, @RequestBody @Valid CardPlayDTO cardPlay) {
+		//TODO implement
+		return Mono.just(ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build());
 	}
 
 }
