@@ -33,7 +33,6 @@ public class GameController {
 	@PostMapping("/game/new")
 	@PreAuthorize("hasRole('USER')")
 	public Mono<GameDTO> startNewGame(@AuthenticationPrincipal String username, @RequestBody @Valid NewGameRequestDTO request) {
-		//TODO Validate input (users, number of decks)
 		return this.gameService.createNewGame(request.getUserNames(), request.getNumberOfDecks()).map((game) -> {
 			return this.gameMapper.gameToDTO(game, username);
 		});

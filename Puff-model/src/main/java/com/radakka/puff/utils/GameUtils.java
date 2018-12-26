@@ -19,6 +19,7 @@ public class GameUtils {
 		//Validate that there is enough decks for the given players
 		int cardsNeeded = users.size() * 9;
 		if(cardsNeeded > numberOfDecks * 40) {
+			//TODO use custom exception
 			throw new RuntimeException("Not enough cards in "+numberOfDecks+ " deck for "+userNames.size()+ " players");
 		}
 		
