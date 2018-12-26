@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.swing.text.html.parser.Entity;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,15 +33,15 @@ public class GameService {
 				Game game = GameUtils.initializeGame(userNames, numberOfDecks);
 				
 				return this.gameRepository.save(game).doOnSuccess((createdGame) -> {
-					this.userRepository.findAllById(Flux.fromIterable(userNames).map((username) -> {
-						return EntityIdUtils.getUserId(username);
-					})).doOnNext((user) -> {
+					this.userRepository.findAllById(Flux.fromIterable(userNames).flatMap((username) -> {
+						return Mono.just(EntityIdUtils.getUserId(username));
+					})).subscribe((user) -> {
 						if(user.getGames() == null) {
 							user.setGames(new ArrayList<>());
 						}
 						user.getGames().add(EntityIdUtils.extractGameId(createdGame.getId()));
-						this.userRepository.save(user);
-					}).collect(Collectors.toList());
+						this.userRepository.save(user).subscribe();
+					});
 				});
 			} else {
 				throw new UsersNotFoundException(usersNotFound);

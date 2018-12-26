@@ -14,8 +14,10 @@ public class GameUtils {
 	
 	public static Game initializeGame(List<String> userNames, int numberOfDecks) {
 		
+		List<String> users = new ArrayList<>(userNames.stream().distinct().collect(Collectors.toList()));
+		
 		//Validate that there is enough decks for the given players
-		int cardsNeeded = userNames.stream().distinct().collect(Collectors.toList()).size() * 9;
+		int cardsNeeded = users.size() * 9;
 		if(cardsNeeded > numberOfDecks * 40) {
 			throw new RuntimeException("Not enough cards in "+numberOfDecks+ " deck for "+userNames.size()+ " players");
 		}
@@ -30,9 +32,9 @@ public class GameUtils {
 		
 		Random random = new Random();
 		int turn = 1;
-		while(userNames.size() > 0) {
+		while(users.size() > 0) {
 			Player player = new Player();
-			player.setUsername(userNames.remove(random.nextInt(userNames.size())));
+			player.setUsername(users.remove(random.nextInt(users.size())));
 			player.setTurn(turn);
 			turn++;
 			
