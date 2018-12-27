@@ -11,6 +11,7 @@ import com.radakka.puff.entity.game.DrawEvent;
 import com.radakka.puff.entity.game.Game;
 import com.radakka.puff.entity.game.GameEventType;
 import com.radakka.puff.entity.game.Player;
+import com.radakka.puff.exception.GameRuleException;
 
 public class GameRules {
 
@@ -58,14 +59,13 @@ public class GameRules {
 				} else if(event.getCardSource().equals(CardSource.FACE_DOWN)) {
 					return doDrawFaceDownCard(game, player, event);
 				} else {
-					//TODO use custom exceptions
-					throw new RuntimeException("You can`t play that card");
+					throw new GameRuleException("You can`t play that card");
 				}
 			} else {
-				throw new RuntimeException("You can`t play cards from "+event.getCardSource());
+				throw new GameRuleException("You can`t play cards from "+event.getCardSource());
 			}
 		} else {
-			throw new RuntimeException("Not your turn");
+			throw new GameRuleException("Not your turn");
 		}
 	}
 	

@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.reactive.function.server.ServerRequest;
 
+import com.radakka.puff.exception.GameRuleException;
 import com.radakka.puff.exception.UsersNotFoundException;
 
 @Component
@@ -34,6 +35,13 @@ public class CustomErrorAttributes extends DefaultErrorAttributes {
 			for(String user : ((UsersNotFoundException) t).getUsersNotFound()) {
 				errorMessages.add("Username "+user+" not found");
 			}
+			customErrorAttributes.put("status", 400);
+			customErrorAttributes.put("error", "Bad Request");
+		} else if(t instanceof GameRuleException) { 
+			errorMessages = new ArrayList<>();
+			errorMessages.add(t.getMessage());
+			customErrorAttributes.put("status", 400);
+			customErrorAttributes.put("error", "Bad Request");
 		} else {
 			errorMessages = new ArrayList<>();
 			errorMessages.add(t.getMessage());

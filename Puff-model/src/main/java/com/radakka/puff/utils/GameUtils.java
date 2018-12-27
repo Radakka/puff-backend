@@ -9,6 +9,7 @@ import com.radakka.puff.entity.game.Card;
 import com.radakka.puff.entity.game.Game;
 import com.radakka.puff.entity.game.Player;
 import com.radakka.puff.entity.game.Suit;
+import com.radakka.puff.exception.GameRuleException;
 
 public class GameUtils {
 	
@@ -19,8 +20,7 @@ public class GameUtils {
 		//Validate that there is enough decks for the given players
 		int cardsNeeded = users.size() * 9;
 		if(cardsNeeded > numberOfDecks * 40) {
-			//TODO use custom exception
-			throw new RuntimeException("Not enough cards in "+numberOfDecks+ " deck for "+userNames.size()+ " players");
+			throw new GameRuleException("Not enough cards in "+numberOfDecks+ " deck for "+userNames.size()+ " players");
 		}
 		
 		Game game = new Game();
