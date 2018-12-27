@@ -27,6 +27,7 @@ public class GameUtils {
 		game.setId(EntityIdUtils.generateNewGameId());
 		game.setPlayedStack(new ArrayList<>());
 		game.setCurrentTurn(1);
+		game.setEnded(false);
 		
 		List<Card> deck = generateShuffledDeck(numberOfDecks);
 		List<Player> players = new ArrayList<>();
@@ -36,6 +37,7 @@ public class GameUtils {
 		while(users.size() > 0) {
 			Player player = new Player();
 			player.setUsername(users.remove(random.nextInt(users.size())));
+			player.setWinner(false);
 			player.setTurn(turn);
 			turn++;
 			

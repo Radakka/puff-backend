@@ -24,6 +24,7 @@ public class Player {
 	@Field
 	private int turn;
 	
-	
+	@Field
+	private Boolean winner;
 	
 }

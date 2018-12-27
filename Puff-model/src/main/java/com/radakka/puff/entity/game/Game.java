@@ -29,5 +29,8 @@ public class Game extends AbstractEntity {
 	
 	@Field
 	private List<GameEvent> events;
+	
+	@Field
+	private Boolean ended;
 
 }
