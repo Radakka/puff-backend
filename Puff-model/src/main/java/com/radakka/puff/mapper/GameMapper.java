@@ -2,17 +2,20 @@ package com.radakka.puff.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
 
 import com.radakka.puff.dto.game.CardDTO;
 import com.radakka.puff.dto.game.GameDTO;
+import com.radakka.puff.dto.game.GameStatusDTO;
 import com.radakka.puff.dto.game.OponentDTO;
 import com.radakka.puff.dto.game.PlayerDTO;
 import com.radakka.puff.entity.game.Card;
 import com.radakka.puff.entity.game.Game;
 import com.radakka.puff.entity.game.Player;
 import com.radakka.puff.rules.GameRules;
+import com.radakka.puff.utils.EntityIdUtils;
 
 @Mapper
 public interface GameMapper {
@@ -20,6 +23,21 @@ public interface GameMapper {
 	CardDTO cardToDTO(Card card);
 
 	List<CardDTO> cardsToDTO(List<Card> cards);
+	
+	default GameStatusDTO gameToStatusDTO(Game game, String username) {
+		GameStatusDTO gameStatus = new GameStatusDTO();
+		gameStatus.setGameId(EntityIdUtils.extractGameId(game.getId()));
+		gameStatus.setGameEnded(game.getEnded());
+		
+		Player currentPlayer = game.getPlayers().stream().filter(p -> p.getTurn() == game.getCurrentTurn()).collect(Collectors.toList()).get(0);
+		if(username.equals(currentPlayer.getUsername())) {
+			gameStatus.setIsUserTurn(true);
+		} else {
+			gameStatus.setIsUserTurn(false);
+		}
+		
+		return gameStatus;
+	}
 
 	default List<CardDTO> cardsToDTOPlayable(List<Card> cards, List<Card> stack) {
 		List<CardDTO> cardsDTO = new ArrayList<>();

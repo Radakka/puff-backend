@@ -73,6 +73,14 @@ public class GameService {
 		});
 	}
 	
+	public Flux<Game> retrieveAllGames(String username) {
+		return this.gameRepository.findAllById(this.userRepository.findById(EntityIdUtils.getUserId(username)).flatMapIterable(user -> {
+			return user.getGames();
+		}).map((gameId) -> {
+			return EntityIdUtils.getGameId(gameId);
+		}));
+	}
+	
 	private Flux<String> getMissingUsers(List<String> usernames) {
 		return Flux.fromIterable(usernames).distinct().flatMap((username) -> {
 			return this.userRepository.existsById(EntityIdUtils.getUserId(username)).flatMap((exists) -> {

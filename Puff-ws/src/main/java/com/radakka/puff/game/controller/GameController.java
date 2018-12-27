@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.radakka.puff.dto.game.CardPlayDTO;
 import com.radakka.puff.dto.game.GameDTO;
+import com.radakka.puff.dto.game.GameStatusDTO;
 import com.radakka.puff.dto.game.NewGameRequestDTO;
 import com.radakka.puff.mapper.GameMapper;
 import com.radakka.puff.service.game.GameService;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -35,6 +37,14 @@ public class GameController {
 	public Mono<GameDTO> startNewGame(@AuthenticationPrincipal String username, @RequestBody @Valid NewGameRequestDTO request) {
 		return this.gameService.createNewGame(request.getUserNames(), request.getNumberOfDecks()).map((game) -> {
 			return this.gameMapper.gameToDTO(game, username);
+		});
+	}
+	
+	@GetMapping("/game/list")
+	@PreAuthorize("hasRole('USER')")
+	public Flux<GameStatusDTO> getGamesList(@AuthenticationPrincipal String username) {
+		return this.gameService.retrieveAllGames(username).map((game) -> {
+			return this.gameMapper.gameToStatusDTO(game, username);
 		});
 	}
 	
