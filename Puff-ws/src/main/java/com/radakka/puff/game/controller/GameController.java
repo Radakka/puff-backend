@@ -58,9 +58,10 @@ public class GameController {
 	
 	@PostMapping("/game/{gameId}/play")
 	@PreAuthorize("hasRole('USER')")
-	public Mono<ResponseEntity<GameDTO>> playCard(@AuthenticationPrincipal String username, @RequestBody @Valid CardPlayDTO cardPlay) {
-		//TODO implement
-		return Mono.just(ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build());
+	public Mono<ResponseEntity<GameDTO>> playCard(@AuthenticationPrincipal String username, @PathVariable String gameId, @RequestBody @Valid CardPlayDTO cardPlay) {
+		return this.gameService.playCard(username, gameId, this.gameMapper.cardPlayDTOToEvent(username, cardPlay)).map((game) -> {
+			return ResponseEntity.ok(this.gameMapper.gameToDTO(game, username));
+		}).defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 	}
 
 }

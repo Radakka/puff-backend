@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.radakka.puff.entity.game.CardPlayEvent;
 import com.radakka.puff.entity.game.Game;
+import com.radakka.puff.entity.game.Player;
 import com.radakka.puff.exception.UsersNotFoundException;
 import com.radakka.puff.repository.user.GameRepository;
 import com.radakka.puff.repository.user.UserRepository;
@@ -64,9 +65,10 @@ public class GameService {
 	
 	public Mono<Game> playCard(String username, String gameId, CardPlayEvent cardPlayed) {
 		return this.gameRepository.findById(EntityIdUtils.getGameId(gameId)).flatMap((game) -> {
-			if(game.getPlayers().stream().filter((player) -> 
-				player.getUsername().equals(username)).collect(Collectors.toList()).size() > 0) {
-				return Mono.just(GameRules.playCard(username, game, cardPlayed));
+			List<Player> filteredPlayers = game.getPlayers().stream().filter((player) -> 
+			player.getUsername().equals(username)).collect(Collectors.toList());
+			if(filteredPlayers.size() > 0) {
+				return Mono.just(GameRules.playCard(username, game, GameUtils.addCardPlayedAndSequenceToEvent(username, filteredPlayers.get(0), game, cardPlayed)));
 			} else {
 				return Mono.empty();
 			}

@@ -18,7 +18,4 @@ public class CardPlayDTO {
 	private String targetPlayer;
 	
 	private Boolean playAllSameCards;
-	
-	@NotNull
-	private Integer lastEventSequence;
 }

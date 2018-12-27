@@ -6,32 +6,33 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.radakka.puff.entity.game.Card;
+import com.radakka.puff.entity.game.CardPlayEvent;
 import com.radakka.puff.entity.game.Game;
 import com.radakka.puff.entity.game.Player;
 import com.radakka.puff.entity.game.Suit;
 import com.radakka.puff.exception.GameRuleException;
 
 public class GameUtils {
-	
+
 	public static Game initializeGame(List<String> userNames, int numberOfDecks) {
-		
+
 		List<String> users = new ArrayList<>(userNames.stream().distinct().collect(Collectors.toList()));
-		
+
 		//Validate that there is enough decks for the given players
 		int cardsNeeded = users.size() * 9;
 		if(cardsNeeded > numberOfDecks * 40) {
 			throw new GameRuleException("Not enough cards in "+numberOfDecks+ " deck for "+userNames.size()+ " players");
 		}
-		
+
 		Game game = new Game();
 		game.setId(EntityIdUtils.generateNewGameId());
 		game.setPlayedStack(new ArrayList<>());
 		game.setCurrentTurn(1);
 		game.setEnded(false);
-		
+
 		List<Card> deck = generateShuffledDeck(numberOfDecks);
 		List<Player> players = new ArrayList<>();
-		
+
 		Random random = new Random();
 		int turn = 1;
 		while(users.size() > 0) {
@@ -40,28 +41,56 @@ public class GameUtils {
 			player.setWinner(false);
 			player.setTurn(turn);
 			turn++;
-			
+
 			List<Card> faceDown = new ArrayList<>();
 			List<Card> faceUp = new ArrayList<>();
 			List<Card> hand = new ArrayList<>();
-			
+
 			for(int i = 0; i < 3;i++) {
 				faceDown.add(deck.remove(0));
 				faceUp.add(deck.remove(0));
 				hand.add(deck.remove(0));
 			}
-			
+
 			player.setFaceDown(faceDown);
 			player.setFaceUp(faceUp);
 			player.setHand(hand);
-			
+
 			players.add(player);
 		}
-		
+
 		game.setPlayers(players);
 		game.setDeck(deck);
-		
+
 		return game;
+	}
+
+	public static CardPlayEvent addCardPlayedAndSequenceToEvent(String username, Player player, Game game, CardPlayEvent event) {
+		try {
+			switch(event.getCardSource()) {
+			case HAND:
+				event.setPlayedCard(player.getHand().get(event.getCardPosition()));
+				break;
+			case FACE_UP:
+				event.setPlayedCard(player.getFaceUp().get(event.getCardPosition()));
+				break;
+			case FACE_DOWN:
+				event.setPlayedCard(player.getFaceDown().get(event.getCardPosition()));
+				break;
+			default:
+				throw new GameRuleException("Invalid card source");
+			}
+		} catch(IndexOutOfBoundsException e) {
+			throw new GameRuleException("Invalid card position");
+		}
+		
+		if(game.getEvents().isEmpty()) {
+			event.setEventSequence(0);
+		} else {
+			event.setEventSequence(game.getEvents().get(game.getEvents().size()-1).getEventSequence()+1);
+		}
+
+		return event;
 	}
 
 	private static List<Card> generateShuffledDeck(int numberOfDecks) {
@@ -78,7 +107,7 @@ public class GameUtils {
 
 	private static List<Card> createDeck(int numberOfDecks) {
 		List<Card> deck = new ArrayList<>();
-		
+
 		for(int i = 0;i < numberOfDecks;i++) {
 			for(Suit suit : Suit.values()) {
 				for(int j = 1;j <= 10;j++) {
