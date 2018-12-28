@@ -16,5 +16,7 @@ public class GameDTO {
 	private List<OponentDTO> oponents;
 	
 	private String currentTurn;
+	
+	private String gameId;
 
 }

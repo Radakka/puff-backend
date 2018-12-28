@@ -16,7 +16,8 @@ import lombok.Data;
 		property = "eventType")
 @JsonSubTypes({
 	@JsonSubTypes.Type(value = CardPlayEvent.class, name = "CARD_PLAY"),
-	@JsonSubTypes.Type(value = DrawEvent.class, name = "CARD_DRAW")
+	@JsonSubTypes.Type(value = DrawEvent.class, name = "CARD_DRAW"),
+	@JsonSubTypes.Type(value = StackCleanEvent.class, name = "STACK_CLEAN")
 })
 public class GameEvent {
 

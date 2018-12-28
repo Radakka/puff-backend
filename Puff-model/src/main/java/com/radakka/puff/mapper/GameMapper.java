@@ -15,7 +15,6 @@ import com.radakka.puff.dto.game.PlayerDTO;
 import com.radakka.puff.entity.game.Card;
 import com.radakka.puff.entity.game.CardPlayEvent;
 import com.radakka.puff.entity.game.Game;
-import com.radakka.puff.entity.game.GameEvent;
 import com.radakka.puff.entity.game.GameEventType;
 import com.radakka.puff.entity.game.Player;
 import com.radakka.puff.rules.GameRules;
@@ -33,7 +32,6 @@ public interface GameMapper {
 
 		event.setCardSource(playDTO.getCardSource());
 		event.setEventType(GameEventType.CARD_PLAY);
-		event.setPlayAllSameCards(playDTO.getPlayAllSameCards());
 		event.setPlayer(username);
 		event.setTargetPlayer(playDTO.getTargetPlayer());
 		event.setCardPosition(playDTO.getCardPosition());
@@ -100,6 +98,7 @@ public interface GameMapper {
 		gameDTO.setDeckSize(game.getDeck().size());
 		gameDTO.setPlayedCards(this.cardsToDTO(game.getPlayedStack()));
 		gameDTO.setOponents(new ArrayList<>());
+		gameDTO.setGameId(EntityIdUtils.extractGameId(game.getId()));
 
 		for(Player player : game.getPlayers()) {
 			if(game.getCurrentTurn() == player.getTurn()) {

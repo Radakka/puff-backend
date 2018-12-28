@@ -1,5 +1,8 @@
 package com.radakka.puff.dto.game;
 
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.radakka.puff.entity.game.CardSource;
@@ -13,9 +16,8 @@ public class CardPlayDTO {
 	private CardSource cardSource;
 	
 	@NotNull
-	private Integer cardPosition;
+	@NotEmpty
+	private List<Integer> cardPosition;
 	
 	private String targetPlayer;
-	
-	private Boolean playAllSameCards;
 }

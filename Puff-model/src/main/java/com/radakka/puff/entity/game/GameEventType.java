@@ -1,5 +1,5 @@
 package com.radakka.puff.entity.game;
 
 public enum GameEventType {
-	CARD_PLAY, CARD_DRAW
+	CARD_PLAY, CARD_DRAW, STACK_CLEAN
 }

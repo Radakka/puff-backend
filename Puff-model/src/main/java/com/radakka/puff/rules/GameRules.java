@@ -13,6 +13,7 @@ import com.radakka.puff.entity.game.Game;
 import com.radakka.puff.entity.game.GameEvent;
 import com.radakka.puff.entity.game.GameEventType;
 import com.radakka.puff.entity.game.Player;
+import com.radakka.puff.entity.game.StackCleanEvent;
 import com.radakka.puff.exception.GameRuleException;
 
 public class GameRules {
@@ -60,14 +61,17 @@ public class GameRules {
 			//Validate card source
 			if(validateSource(event.getCardSource(), player)) {
 				//Validate target player if the played card is a 1
-				if(event.getPlayedCard().getNumber() == 1) {
+				if(event.getPlayedCards().get(0).getNumber() == 1) {
+					if(username.equals(event.getTargetPlayer())) {
+						throw new GameRuleException("You can't target yourself");
+					}
 					List<Player> targetPlayer = game.getPlayers().stream().filter(p -> p.getUsername().equals(event.getTargetPlayer())).collect(Collectors.toList());
 					if(targetPlayer.isEmpty()) {
 						throw new GameRuleException("Target player "+event.getTargetPlayer()+" is not in this game");
 					}
 				}
 				//Validate played card
-				if(isPlayable(event.getPlayedCard(), game.getPlayedStack())) {
+				if(isPlayable(event.getPlayedCards().get(0), game.getPlayedStack())) {
 					return doPlayCard(game, player, event);
 				} else if(event.getCardSource().equals(CardSource.FACE_DOWN) || event.getCardSource().equals(CardSource.FACE_UP)) {
 					return doDrawTableCard(game, player, event);
@@ -85,7 +89,7 @@ public class GameRules {
 	private static boolean checkWin(List<Player> players, CardPlayEvent event) {
 		for(Player player : players) {
 			if(player.getHand().isEmpty() && player.getFaceUp().isEmpty() && player.getFaceDown().isEmpty()) {
-				if(event.getPlayedCard().getNumber() != 1 || !event.getTargetPlayer().equals(player.getUsername())) {
+				if(event.getPlayedCards().get(0).getNumber() != 1 || !event.getTargetPlayer().equals(player.getUsername())) {
 					player.setWinner(true);
 					return true;
 				}
@@ -95,19 +99,18 @@ public class GameRules {
 	}
 
 	private static Game doPlayCard(Game game, Player player, CardPlayEvent event) {
-		//TODO implement play all card with same number
 		switch(event.getCardSource()) {
 		case HAND:
-			player.getHand().remove(event.getCardPosition().intValue());
-			game.getPlayedStack().add(event.getPlayedCard());
+			player.getHand().removeAll(event.getPlayedCards());
+			game.getPlayedStack().addAll(event.getPlayedCards());
 			break;
 		case FACE_UP:
-			player.getFaceUp().remove(event.getCardPosition().intValue());
-			game.getPlayedStack().add(event.getPlayedCard());
+			player.getFaceUp().removeAll(event.getPlayedCards());
+			game.getPlayedStack().addAll(event.getPlayedCards());
 			break;
 		case FACE_DOWN:
-			player.getFaceDown().remove(event.getCardPosition().intValue());
-			game.getPlayedStack().add(event.getPlayedCard());
+			player.getFaceDown().removeAll(event.getPlayedCards());
+			game.getPlayedStack().addAll(event.getPlayedCards());
 			break;
 		default:
 			break;
@@ -117,27 +120,68 @@ public class GameRules {
 			game.setEnded(true);
 			return game;
 		}
+		GameEvent lastEvent = checkAndDoStackClean(game, event);
 		
-		return triggerNextTurn(game, player, event);
+		return triggerNextTurn(game, player, lastEvent);
+	}
+	
+	private static GameEvent checkAndDoStackClean(Game game, GameEvent event) {
+		boolean shouldCleanStack = false;
+		if(game.getPlayedStack().size() > 0) {
+			Card lastPlayed = game.getPlayedStack().get(game.getPlayedStack().size() - 1);
+			if(lastPlayed.getNumber() == 8) {
+				shouldCleanStack = true;
+			} else if(game.getPlayedStack().size()>3){
+				int numberOfSameCards = 1;
+				for(int i = 1; i < 4;i++) {
+					Card cardToCheck = game.getPlayedStack().get(game.getPlayedStack().size() - 1 - i);
+					if(cardToCheck.getNumber() == lastPlayed.getNumber()) {
+						numberOfSameCards++;
+					}
+				}
+				if(numberOfSameCards == 4) {
+					shouldCleanStack = true;
+				}
+			}
+		}
+		
+		if(shouldCleanStack) {
+			StackCleanEvent cleanEvent = new StackCleanEvent();
+			cleanEvent.setCardsCleaned(new ArrayList<>(game.getPlayedStack()));
+			cleanEvent.setEventSequence(event.getEventSequence() + 1);
+			cleanEvent.setEventType(GameEventType.STACK_CLEAN);
+			cleanEvent.setPlayer(event.getPlayer());
+			
+			game.getEvents().add(cleanEvent);
+			
+			game.getPlayedStack().clear();
+			return cleanEvent;
+		}
+		
+		return event;
 	}
 
 	private static Game doDrawTableCard(Game game, Player player, CardPlayEvent event) {
-		//TODO implement draw all cards with same number
 		List<Card> cardSource = player.getFaceDown();
 		if(event.getCardSource().equals(CardSource.FACE_UP)) {
 			cardSource = player.getFaceUp();
+			for(Card card : cardSource) {
+				if(isPlayable(card, game.getPlayedStack())) {
+					throw new GameRuleException("You have playable cards in the table");
+				}
+			}
 		}
-		cardSource.remove(event.getCardPosition().intValue());
-		player.getHand().add(event.getPlayedCard());
+		cardSource.removeAll(event.getPlayedCards());
+		player.getHand().addAll(event.getPlayedCards());
 		
 		DrawEvent drawEvent = new DrawEvent();
 		drawEvent.setEventType(GameEventType.CARD_DRAW);
 		drawEvent.setCardSource(event.getCardSource());
 		drawEvent.setEventSequence(event.getEventSequence() + 1);
 		drawEvent.setPlayer(player.getUsername());
-		drawEvent.setCardsDrawn(Arrays.asList(event.getPlayedCard()));
+		drawEvent.setCardsDrawn(event.getPlayedCards());
 		
-		return triggerNextTurn(game, player, event);
+		return triggerNextTurn(game, player, drawEvent);
 	}
 
 	private static DrawEvent doDrawDeckCard(Game game, Player player, int eventSequence) {
@@ -155,6 +199,7 @@ public class GameRules {
 	private static DrawEvent doDrawStack(Game game, Player player, int eventSequence) {
 		List<Card> drawnCards = new ArrayList<>(game.getPlayedStack());
 		player.getHand().addAll(drawnCards);
+		game.getPlayedStack().clear();
 		DrawEvent event = new DrawEvent();
 		event.setEventType(GameEventType.CARD_DRAW);
 		event.setCardSource(CardSource.STACK);
@@ -171,14 +216,15 @@ public class GameRules {
 			game.getEvents().add(doDrawDeckCard(game, player, ++eventSequence));
 		}
 
-		//If the card played is a 9, the player must play another card. If not, is the next player turn
+		//If the card played is a 9 or the stack was cleaned, the player must play another card. If not, is the next player turn
 		Player nextPlayer = player;
-		if(event instanceof DrawEvent || (event instanceof CardPlayEvent && ((CardPlayEvent) event).getPlayedCard().getNumber() != 9)) {
+		if(event instanceof DrawEvent || (event instanceof CardPlayEvent && ((CardPlayEvent) event).getPlayedCards().get(0).getNumber() != 9)) {
 			//If a player plays a 1, the next turn is chosen by the player
-			if(event instanceof CardPlayEvent && ((CardPlayEvent) event).getPlayedCard().getNumber() == 1) {
+			if(event instanceof CardPlayEvent && ((CardPlayEvent) event).getPlayedCards().get(0).getNumber() == 1) {
 				nextPlayer = game.getPlayers().stream().filter(p -> p.getUsername().equals(((CardPlayEvent) event).getTargetPlayer())).collect(Collectors.toList()).get(0);
 				game.setCurrentTurn(nextPlayer.getTurn());
-			} else {
+			} else if(!(event instanceof DrawEvent) || ((DrawEvent)event).getCardSource().equals(CardSource.STACK)){
+				//If the event is a table card draw, turn should not rotate
 				int nextTurn = (game.getCurrentTurn() % game.getPlayers().size()) + 1;
 				game.setCurrentTurn(nextTurn);
 				nextPlayer = game.getPlayers().stream().filter(p -> p.getTurn() == nextTurn).collect(Collectors.toList()).get(0);

@@ -68,7 +68,9 @@ public class GameService {
 			List<Player> filteredPlayers = game.getPlayers().stream().filter((player) -> 
 			player.getUsername().equals(username)).collect(Collectors.toList());
 			if(filteredPlayers.size() > 0) {
-				return Mono.just(GameRules.playCard(username, game, GameUtils.addCardPlayedAndSequenceToEvent(username, filteredPlayers.get(0), game, cardPlayed)));
+				return Mono.just(GameRules.playCard(username, game, GameUtils.addCardPlayedAndSequenceToEvent(username, filteredPlayers.get(0), game, cardPlayed))).doOnSuccess((updatedGame) -> {
+					this.gameRepository.save(updatedGame).subscribe();
+				});
 			} else {
 				return Mono.empty();
 			}

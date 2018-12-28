@@ -1,6 +1,7 @@
 package com.radakka.puff.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ public class GameUtils {
 		Game game = new Game();
 		game.setId(EntityIdUtils.generateNewGameId());
 		game.setPlayedStack(new ArrayList<>());
+		game.setEvents(new ArrayList<>());
 		game.setCurrentTurn(1);
 		game.setEnded(false);
 
@@ -67,15 +69,39 @@ public class GameUtils {
 
 	public static CardPlayEvent addCardPlayedAndSequenceToEvent(String username, Player player, Game game, CardPlayEvent event) {
 		try {
+			if(game.getEnded()) {
+				throw new GameRuleException("This game has ended");
+			}
+			event.setPlayedCards(new ArrayList<>());
+			int playedNumber = 0;
 			switch(event.getCardSource()) {
 			case HAND:
-				event.setPlayedCard(player.getHand().get(event.getCardPosition()));
+				for(Integer position : event.getCardPosition()) {
+					Card card = player.getHand().get(position);
+					event.getPlayedCards().add(card);
+					if(playedNumber == 0) {
+						playedNumber = card.getNumber();
+					} else if(playedNumber != card.getNumber()) {
+						throw new GameRuleException("Multiple cards can only be played if they have the same number");
+					}
+				}
 				break;
 			case FACE_UP:
-				event.setPlayedCard(player.getFaceUp().get(event.getCardPosition()));
+				for(Integer position : event.getCardPosition()) {
+					Card card = player.getFaceUp().get(position);
+					event.getPlayedCards().add(card);
+					if(playedNumber == 0) {
+						playedNumber = card.getNumber();
+					} else if(playedNumber != card.getNumber()) {
+						throw new GameRuleException("Multiple cards can only be played if they have the same number");
+					}
+				}
 				break;
 			case FACE_DOWN:
-				event.setPlayedCard(player.getFaceDown().get(event.getCardPosition()));
+				if(event.getCardPosition().size() != 1) {
+					throw new GameRuleException("Face down cards can only be played one by one");
+				}
+				event.getPlayedCards().add(player.getFaceDown().get(event.getCardPosition().get(0)));
 				break;
 			default:
 				throw new GameRuleException("Invalid card source");
@@ -83,7 +109,7 @@ public class GameUtils {
 		} catch(IndexOutOfBoundsException e) {
 			throw new GameRuleException("Invalid card position");
 		}
-		
+
 		if(game.getEvents().isEmpty()) {
 			event.setEventSequence(0);
 		} else {
