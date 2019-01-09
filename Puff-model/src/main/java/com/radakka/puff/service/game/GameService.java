@@ -29,6 +29,9 @@ public class GameService {
 	@Autowired
 	private UserRepository userRepository;
 	
+	@Autowired
+	private EventService eventService;
+	
 	public Mono<Game> createNewGame(List<String> userNames, int numberOfDecks) {
 		
 		return this.getMissingUsers(new ArrayList<>(userNames)).collect(Collectors.toList()).flatMap((usersNotFound) -> {
@@ -70,6 +73,8 @@ public class GameService {
 			if(filteredPlayers.size() > 0) {
 				return Mono.just(GameRules.playCard(username, game, GameUtils.addCardPlayedAndSequenceToEvent(username, filteredPlayers.get(0), game, cardPlayed))).doOnSuccess((updatedGame) -> {
 					this.gameRepository.save(updatedGame).subscribe();
+				}).doOnSuccess((savedGame) -> {
+					this.eventService.publishEvent(gameId, username, game);
 				});
 			} else {
 				return Mono.empty();
