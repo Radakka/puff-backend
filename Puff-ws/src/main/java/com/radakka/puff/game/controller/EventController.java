@@ -30,7 +30,7 @@ public class EventController {
 	@PreAuthorize("hasRole('USER')")
 	public Flux<GameDTO> eventsFlux(@PathVariable String gameId, @AuthenticationPrincipal String username) {
 		DirectProcessor<Game> processor = eventService.registerProcessor(gameId, username);
-		return processor.subscribeOn(Schedulers.single()).map((game) -> {
+		return processor.subscribeOn(Schedulers.elastic()).map((game) -> {
 			return gameMapper.gameToDTO(game, username);
 		});
 	}
