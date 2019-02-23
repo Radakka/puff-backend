@@ -49,7 +49,6 @@ public class UserController {
 	}
 
 	@PostMapping("/register")
-	@PreAuthorize("hasRole('ADMIN')")
 	public Mono<ResponseEntity<Object>> register(@RequestBody @Valid RegisterRequestDTO registerRequest) {
 		return this.userService.registerUser(registerRequest).map((savedUser) -> {
 			return ResponseEntity.ok().build();
