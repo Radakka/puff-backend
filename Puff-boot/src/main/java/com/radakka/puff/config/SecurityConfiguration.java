@@ -1,7 +1,5 @@
 package com.radakka.puff.config;
 
-import java.util.Arrays;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -32,6 +30,7 @@ public class SecurityConfiguration {
 		.authorizeExchange()
 		.pathMatchers(HttpMethod.OPTIONS).permitAll()
 		.pathMatchers("/login").permitAll()
+		.pathMatchers("/register").permitAll()
 		.anyExchange().authenticated();
 
 		return http.build();
